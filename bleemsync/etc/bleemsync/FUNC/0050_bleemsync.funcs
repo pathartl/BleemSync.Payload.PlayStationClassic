@@ -34,6 +34,7 @@ launch_retroarch(){
       cp -f "/gaadata/system/bios/romw.bin" "$bleemsync_path/opt/retroarch/system/scph102b.bin"
       echo "[BLEEMSYNC](INFO) copied romw.bin to scph102b.bin for RA PCSX"
     fi
+    rm -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg"
     mkdir -p "/tmp/ra_cache"
     custom_theme_path="$bleemsync_path/opt/retroarch/.config/retroarch/assets/xmb/custom"
     [ ! -f "$custom_theme_path/font.ttf" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$custom_theme_path/font.ttf"
