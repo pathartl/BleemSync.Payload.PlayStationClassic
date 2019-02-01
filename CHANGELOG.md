@@ -17,6 +17,8 @@ FEATURES TO GO INTO NEXT RELEASE
 - Fixed JAPAN console RA stock game list in RA GUI
 - Fixed JAPAN stock EMMC games to prevent crashing when loading BS1.0 on JP console
 - Optimised on console SQLITE3 code
+- Fixed the chance of RA overwritting good fixed configs with crap ones.
+- Fixed Old RA folder not moving to remove/ after migration 
 
 ---------------------------------------------------------------------------------
 PREVIOUS RELEASE NOTES
