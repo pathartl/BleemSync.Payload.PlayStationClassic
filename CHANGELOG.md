@@ -9,6 +9,7 @@ MAKE SURE IF YOU DO A PULL REQUEST THAT YOU ADD THE FEATURE TO THE THE LIST BELO
 FEATURES TO GO INTO NEXT RELEASE
 ---------------------------------------------------------------------------------
 - Remove retroarch-core-options.cfg on RA boot to prevent crap core options overriding fixes
+- fixed broken RA font on copy over from console
 - Migrate now migrates over cores and bios files correctly
 - Added Credits and License information
 - Added Uppercase support for alternative format games
