@@ -43,7 +43,6 @@ launch_retroarch(){
     export HOME="$bleemsync_path/opt/retroarch"
     $bleemsync_path/opt/retroarch/retroarch -v &> "$runtime_log_path/retroarch.log"
     rm -rf "/tmp/ra_cache"
-    umount "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg" &> "/dev/null"
     export HOME="/home/root" && cd "/home/root"
     sync
     echo launch_BootMenu > "/tmp/launchfilecommand"
