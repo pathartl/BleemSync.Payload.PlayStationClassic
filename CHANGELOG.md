@@ -18,6 +18,7 @@ FEATURES TO GO INTO NEXT RELEASE
 - Optimised on console SQLITE3 code
 - Fixed the chance of RA overwritting good fixed configs with crap ones.
 - Fixed Old RA folder not moving to remove/ after migration 
+- If no retroarch core options config exists then create. (Stops overwriting existing configs)
 
 ---------------------------------------------------------------------------------
 PREVIOUS RELEASE NOTES
