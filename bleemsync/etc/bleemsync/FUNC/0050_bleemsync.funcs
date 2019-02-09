@@ -35,7 +35,6 @@ launch_retroarch(){
       echo "[BLEEMSYNC](INFO) copied romw.bin to scph102b.bin for RA PCSX"
     fi
     mkdir -p "/tmp/ra_cache"
-    [ ! -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg"] && touch "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg"
     custom_theme_path="$bleemsync_path/opt/retroarch/.config/retroarch/assets/xmb/custom"
     rm -f "$custom_theme_path/font.tff"
     [ ! -f "$custom_theme_path/font.ttf" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$custom_theme_path/font.ttf"
@@ -95,6 +94,28 @@ launch_StockUI(){
   umount /gaadata/databases/regional.db
   umount /usr/sony/share/data/preferences/system.pre
   rm -r "${VOL_GAADATA}" "${VOL_DATAPCSX}" /var/volatile/bleemsync.cfg
+}
+
+initial_setup() {
+  start=$(date +%s%N)
+  if [ ! -f "$bleemsync_path/etc/bleemsync/CFG/bleemsync_cfg.INI"] || [ -f "$bleemsync_path/flags/UPDATE_CONFIG"]; then
+    echo "[BLEEMSYNC](INFO) Injecting default bleemsync config..."
+    cat "$bleemsync_path/etc/bleemsync/CFG/bleemsync_cfg_DEFAULT.INI" > "$bleemsync_path/etc/bleemsync/CFG/bleemsync_cfg.INI"
+    rm -f "$bleemsync_path/flags/UPDATE_CONFIG"
+  fi
+  if [ ! -f "$bleemsync_path/etc/bleemsync/CFG/boot_sequence.cfg"] || [ -f "$bleemsync_path/flags/UPDATE_BOOT"]; then
+    echo "[BLEEMSYNC](INFO) Injecting default boot sequence..."
+    cat "$bleemsync_path/etc/bleemsync/CFG/boot_sequence_DEFAULT.cfg" > "$bleemsync_path/etc/bleemsync/CFG/boot_sequence.cfg"
+    rm -f "$bleemsync_path/flags/UPDATE_BOOT"
+  fi
+  if [ ! -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg"] || [ -f "$bleemsync_path/flags/UPDATE_RA_CONFIG"]; then
+    echo "[BLEEMSYNC](INFO) Injecting default retroarch config..."
+    cat "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch_DEFAULT.cfg" > "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg"
+    rm -f "$bleemsync_path/flags/UPDATE_RA_CONFIG"
+  fi
+  [ ! -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg"] && touch "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg"
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync initial set up took: $(((end-start)/1000000))ms to execute" 
 }
 
 setup_StockUI() {
@@ -248,6 +269,9 @@ execute_bleemsync_func(){
     echo "[BLEEMSYNC](INFO) This may be a new install. Creating databases folder"
     mkdir -p "$bleemsync_path/etc/bleemsync/SYS/databases"
   fi
+
+  #Initalise config or update if required
+  initial_setup
     
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
