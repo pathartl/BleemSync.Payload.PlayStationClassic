@@ -18,7 +18,9 @@ FEATURES TO GO INTO NEXT RELEASE
 - Optimised on console SQLITE3 code
 - Fixed the chance of RA overwritting good fixed configs with crap ones.
 - Fixed Old RA folder not moving to remove/ after migration 
-- If no retroarch core options config exists then create. (Stops overwriting existing configs)
+- If no retroarch core options config exists then create. (Stops overwriting existing global core configs)
+- Changed config logic so if no cfgs used for BS or RA then create them on load with defaults
+- ADDED UPDATE_CONFIG, UPDATE_RA_CONFIG and UPDATE_BOOT to supported flags (use to force update cfg with defaults)
 
 ---------------------------------------------------------------------------------
 PREVIOUS RELEASE NOTES
