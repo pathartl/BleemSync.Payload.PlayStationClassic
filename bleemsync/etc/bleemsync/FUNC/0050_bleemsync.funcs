@@ -98,22 +98,22 @@ launch_StockUI(){
 
 initial_setup() {
   start=$(date +%s%N)
-  if [ ! -f "$bleemsync_path/etc/bleemsync/CFG/bleemsync_cfg.INI"] || [ -f "$bleemsync_path/flags/UPDATE_CONFIG"]; then
+  if [ ! -f "$bleemsync_path/etc/bleemsync/CFG/bleemsync_cfg.INI" ] || [ -f "$bleemsync_path/flags/UPDATE_CONFIG" ]; then
     echo "[BLEEMSYNC](INFO) Injecting default bleemsync config..."
     cat "$bleemsync_path/etc/bleemsync/CFG/bleemsync_cfg_DEFAULT.INI" > "$bleemsync_path/etc/bleemsync/CFG/bleemsync_cfg.INI"
     rm -f "$bleemsync_path/flags/UPDATE_CONFIG"
   fi
-  if [ ! -f "$bleemsync_path/etc/bleemsync/CFG/boot_sequence.cfg"] || [ -f "$bleemsync_path/flags/UPDATE_BOOT"]; then
+  if [ ! -f "$bleemsync_path/etc/bleemsync/CFG/boot_sequence.cfg" ] || [ -f "$bleemsync_path/flags/UPDATE_BOOT" ]; then
     echo "[BLEEMSYNC](INFO) Injecting default boot sequence..."
     cat "$bleemsync_path/etc/bleemsync/CFG/boot_sequence_DEFAULT.cfg" > "$bleemsync_path/etc/bleemsync/CFG/boot_sequence.cfg"
     rm -f "$bleemsync_path/flags/UPDATE_BOOT"
   fi
-  if [ ! -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg"] || [ -f "$bleemsync_path/flags/UPDATE_RA_CONFIG"]; then
+  if [ ! -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg" ] || [ -f "$bleemsync_path/flags/UPDATE_RA_CONFIG" ]; then
     echo "[BLEEMSYNC](INFO) Injecting default retroarch config..."
     cat "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch_DEFAULT.cfg" > "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch.cfg"
     rm -f "$bleemsync_path/flags/UPDATE_RA_CONFIG"
   fi
-  [ ! -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg"] && touch "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg"
+  [ ! -f "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg" ] && touch "$bleemsync_path/opt/retroarch/.config/retroarch/retroarch-core-options.cfg"
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync initial set up took: $(((end-start)/1000000))ms to execute" 
 }
