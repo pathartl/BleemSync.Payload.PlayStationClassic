@@ -222,7 +222,7 @@ setup_StockUI() {
     done 
 
     if [ "$link_alphabeticalise" = "1" ]; then
-      "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "DROP VIEW GAME" "CREATE VIEW GAME AS SELECT * FROM MENU_ENTRIES ORDER BY GAME_TITLE_STRING" ".quit"
+      "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "DROP VIEW GAME" "CREATE VIEW GAME AS SELECT * FROM MENU_ENTRIES ORDER BY LOWER(GAME_TITLE_STRING)" ".quit"
     fi
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
