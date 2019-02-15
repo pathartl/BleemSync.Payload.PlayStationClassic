@@ -21,6 +21,12 @@ FEATURES TO GO INTO NEXT RELEASE
 - If no retroarch core options config exists then create. (Stops overwriting existing global core configs)
 - Changed config logic so if no cfgs used for BS or RA then create them on load with defaults
 - ADDED UPDATE_CONFIG, UPDATE_RA_CONFIG and UPDATE_BOOT to supported flags (use to force update cfg with defaults)
+- Added Xpad driver support. Loads more controller support added, including Xbox 1, Xbox 360 and steam controller support. Mostly complete list available here:https://gist.githubusercontent.com/swingflip/70e5ec3e4b81e3e87d15823eaf241a09/raw/71e80ed9dd183335ed6e6c3adf7672e67d3c6839/gistfile1.txt
+- Added SDL mapping support for the boot menu
+- Added physical console button support for the boot menu 
+(`reset` toggles options. `open` selects that option)
+- Changed memory configuration to prevent crashes from occurring when memory limit is nearing. We now over commit memory so a lot of issues should now be prevented.
+
 
 ---------------------------------------------------------------------------------
 PREVIOUS RELEASE NOTES
