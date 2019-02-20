@@ -26,6 +26,18 @@ FEATURES TO GO INTO NEXT RELEASE
 - Added physical console button support for the boot menu 
 (`reset` toggles options. `open` selects that option)
 - Changed memory configuration to prevent crashes from occurring when memory limit is nearing. We now over commit memory so a lot of issues should now be prevented.
+- overcommit the DRAM
+- Created extra fast swap ram totalling to 512mb more memory split across 4 cores into 128mb banks to increase compatibility, stability and slight performance (in some small cases) 
+- Added new bleemsync build of RetroArch 1.7.6
+- UPX compressed 1.7.6
+- Removed Standard Monochrome XMB theme assets
+- Compressed all RA bundled assets 
+- Added brand new Ozone theme as default (won't override existing set ups)
+- Added compressed Ozone theme assets
+- Prepped some code for OverClocking and network support within RA
+- Optimised GDB and SQLite3
+- Improved initial RA directory structure
+- Optimised RA as a whole down from 18.2mb to 8.23mb (approx 50% reduction whilst include many more features)
 
 
 ---------------------------------------------------------------------------------
