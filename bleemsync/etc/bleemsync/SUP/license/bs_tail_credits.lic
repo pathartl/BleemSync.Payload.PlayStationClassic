@@ -1,0 +1,21 @@
+-------------------
+
+Below is an always updating list of license’s for the software used in the BleemSync Project. While opensource software dictates that we must provide a license for software we use, distribute, and modify, it’s not 100% possible for us to keep this page up to date every day. We will start off by stating the following; BleemSync itself falls under GPLv3, we use components that fall under GPLv2, and the zLib license. Some of the components available through the BleemSync Project are also in the public domain.
+
+for more information please vist: modmyclassic.com/license
+
+Name // Free/Non-Free // License // Source
+libpng // Free // zlib // 
+sdl2 // Free // zlib // 
+sdl_mixer // Free // zlib // 
+libmagic // free // GPL // 
+libncurses // free // Here // 
+PCSX ReARMed // Free // GPL // 
+Linux Kernel // Free // GPL v2 Explicit // 
+ntfs_3g // Free // GPL // 
+sqlite // Free // Public Domain // 
+GNU nano // free // GPL // 
+kexec // free // GPL // 
+gdbus // free // GPL // 
+mount_ntfs // free // APL // 
+busybox // free // GPLv2 Explicit // 

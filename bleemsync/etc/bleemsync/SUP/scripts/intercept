@@ -130,8 +130,14 @@ do
 
       start_alt=$(date +%s%N)
       for f in "${intercept_file_formats[@]}"; do
-        intercept_game_alternative_path="${arg%.cue}.${f}"
-        if [ -f "$intercept_game_alternative_path" ]; then
+        f_upper=$(echo $f | tr a-z A-Z)
+        if [ -f "${arg%.cue}.${f}" ]; then
+          intercept_game_alternative_path="${arg%.cue}.${f}"
+        elif [ -f "${arg%.cue}.${f_upper}" ]; then
+          intercept_game_alternative_path="${arg%.cue}.${f_upper}"
+          f=$f_upper
+        fi
+        if [ ! -z "$intercept_game_alternative_path" ]; then
           echo "[INTERCEPT](INFO) Alternative game format exists (${f}), this will be used instead of the .cue"
           arg="$intercept_game_alternative_path"
           intercept_game_path="$arg"
