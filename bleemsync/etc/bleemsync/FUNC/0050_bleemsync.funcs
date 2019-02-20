@@ -37,7 +37,11 @@ launch_retroarch(){
     mkdir -p "/tmp/ra_cache"
     custom_theme_path="$bleemsync_path/opt/retroarch/.config/retroarch/assets/xmb/custom"
     ozone_theme_path="$bleemsync_path/opt/retroarch/.config/retroarch/assets/ozone"
-
+    if [ `cat /gaadata/geninfo/REGION` = "J" ]; then
+      cp "$bleemsync_path/etc/bleemsync/SUP/retroarch/psc_jpn.lpl" "$retroarch_path/.config/retroarch/playlists/PlayStation Classic - Internal.lpl"
+    else
+      cp "$bleemsync_path/etc/bleemsync/SUP/retroarch/psc_row.lpl" "$retroarch_path/.config/retroarch/playlists/PlayStation Classic - Internal.lpl"
+    fi
     rm -f "$custom_theme_path/font.tff"
     [ ! -f "$custom_theme_path/font.ttf" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$custom_theme_path/font.ttf"
     [ ! -f "$ozone_theme_path/regular.ttf" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$ozone_theme_path/regular.ttf"
