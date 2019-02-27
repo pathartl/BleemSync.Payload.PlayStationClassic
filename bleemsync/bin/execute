@@ -47,6 +47,12 @@ for funcs in /media/bleemsync/etc/bleemsync/FUNC/*.funcs; do source "$funcs"; do
 
 ### EXECUTE ###################################################################
 main(){
+	#If the devmode flag exists. Don't bother starting anything else up.
+  if [ -f "$runtime_flag_path/DEVMODE" ]; then 
+  while true; do
+    sleep 99
+  done
+	fi
   for x in "${boot_sequence[@]}"; do
     echo "[BLEEMSYNC](BOOT) booting "$x"_func()" >> "${error_log}"
     time1=$(date +%s%N)
