@@ -58,7 +58,7 @@ select_UI_theme() {
 	if [ "$selected_theme" != "stock" ] && [ -d "$themes_path/$selected_theme" ]; then
 		# Set found theme var for log
 		found_theme=1
-
+		
 		# Check for the music folder
 		if [ -d "$themes_path/$selected_theme/music" ] && [ "$override_theme_music" = "0" ]; then
 			found_music_files=1
