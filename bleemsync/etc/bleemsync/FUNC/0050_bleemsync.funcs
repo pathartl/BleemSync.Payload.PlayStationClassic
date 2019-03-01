@@ -64,8 +64,6 @@ launch_retroarch(){
     if [ "$1" != "--from_ui" ]; then
       echo launch_BootMenu > "/tmp/launchfilecommand"
     else
-	  systemctl restart weston
-      wait_sdl
       echo launch_StockUI > "/tmp/launchfilecommand"
     fi
   else
@@ -117,8 +115,6 @@ launch_StockUI(){
   # Restart Weston to prevent crash due to SONY's shit code.
   if [ -f "/tmp/weston_need_restart.flag" ]; then
     rm -f "/tmp/weston_need_restart.flag"
-    #systemctl restart weston
-    #wait_sdl
   fi
   # Remove power file flags
   rm -f "/data/power/prepare_suspend" "/data/power/apps_okay"
@@ -463,6 +459,15 @@ execute_bleemsync_func(){
 #-----------------------------------------------------------------------------#
   while [ $boot_command != "quit" ]; do
     $boot_command
+    if [ $boot_command = "launch_StockUI" ]; then
+      # Restart Weston when returning from Stock UI
+      # It may be worth doing this when returning from any command
+      start_weston=$(date +%s%N)
+      systemctl restart weston
+      wait_sdl
+      end_weston=$(date +%s%N)
+      echo "[BLEEMSYNC](PROFILE) Weston restart took: $(((end_weston-start_weston)/1000000))ms to execute"
+    fi
     [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
     rm -f /tmp/launchfilecommand
   done
