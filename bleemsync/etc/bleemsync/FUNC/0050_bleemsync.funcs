@@ -64,7 +64,8 @@ launch_retroarch(){
     if [ "$1" != "--from_ui" ]; then
       echo launch_BootMenu > "/tmp/launchfilecommand"
     else
-	  echo "DEBUG1"
+	  systemctl restart weston
+      wait_sdl
       echo launch_StockUI > "/tmp/launchfilecommand"
     fi
   else
@@ -105,7 +106,6 @@ launch_BootMenu(){
 }
 
 launch_StockUI(){
-  echo "DEBUG2"
   echo "[BLEEMSYNC](INFO) launching stock ui"
   # Cleanup
   cd "/home/root"
@@ -113,9 +113,13 @@ launch_StockUI(){
   killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
   rm -f "/tmp/launchfilecommand"
   # Setup Stock UI with custom
-  echo "DEBUG3"
   setup_StockUI
-  echo "DEBUG4"
+  # Restart Weston to prevent crash due to SONY's shit code.
+  if [ -f "/tmp/weston_need_restart.flag" ]; then
+    rm -f "/tmp/weston_need_restart.flag"
+    #systemctl restart weston
+    #wait_sdl
+  fi
   # Remove power file flags
   rm -f "/data/power/prepare_suspend" "/data/power/apps_okay"
   # Fix for last selected game issue. If not in place user may experience ui issue
@@ -126,10 +130,7 @@ launch_StockUI(){
   # Indicate we have done the first boot
   touch "/var/volatile/booted.flag"
   # Run Stock UI
-  echo "DEBUG5"
-  ls -la "/data/power/"
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
-  echo "DEBUG6"
   # Post Stock UI run cleanup
   rm -f "/data/power/prepare_suspend"
   sed -i "s/iUiUserSettingLastSelectGameCursorPos=.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
