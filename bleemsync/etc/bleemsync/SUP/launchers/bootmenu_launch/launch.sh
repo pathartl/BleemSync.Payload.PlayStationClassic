@@ -6,4 +6,5 @@ source "/var/volatile/bleemsync.cfg"
 ### LOAD FUNCTION LIBRARIES ###################################################
 source "/media/bleemsync/etc/bleemsync/FUNC/0050_bleemsync.funcs"
 
-launch_BootMenu
+touch /data/power/prepare_suspend
+echo launch_BootMenu > "/tmp/launchfilecommand"

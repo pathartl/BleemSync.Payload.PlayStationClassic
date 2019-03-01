@@ -27,10 +27,7 @@ launch_retroarch(){
     # Kill bleemsync UI
     killall -s TERM BleemSync &> /dev/null
     cd "/home/root"
-    if [ "$1" != "--from_ui" ]; then
-      echo "DEBUG - KILL ALL"
-      killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
-    fi
+    killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
     [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
     if [ ! -f "$bleemsync_path/opt/retroarch/system/scph102b.bin" ]; then
       mkdir -p "$bleemsync_path/opt/retroarch/system"
@@ -56,29 +53,14 @@ launch_retroarch(){
     rm -rf "/tmp/ra_cache"
     export HOME="/home/root" && cd "/home/root"
     sync
-    if [ "$1" != "--from_ui" ]; then
-      echo "DEBUG - LAUNCHCOMMAND"
-      echo launch_BootMenu > "/tmp/launchfilecommand"
-    else
-      ui_menu_pid=`ps|grep ui_menu|grep -v grep|awk '{print $1}'`
-      kill -CONT "$ui_menu_pid"
-      ui_menu_pid=""
-    fi
+    echo launch_BootMenu > "/tmp/launchfilecommand"
   else
     $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
     sleep 1
     echo "[BLEEMSYNC](FAIL) tried to launch retroarch and it's not installed! Opening Stock ui..."
     killall -s KILL sdl_display &> "/dev/null"
-    if [ "$1" != "--from_ui" ]; then
-      echo "DEBUG - LAUNCHCOMMAND"
-      echo launch_StockUI > "/tmp/launchfilecommand"
-    else
-      ui_menu_pid=`ps|grep ui_menu|grep -v grep|awk '{print $1}'`
-      kill -CONT "$ui_menu_pid"
-      ui_menu_pid=""
-    fi
+    echo launch_StockUI > "/tmp/launchfilecommand"
   fi
-  echo "DEBUG - EXITING FUNCTION"
 }
 
 launch_BootMenu(){
