@@ -20,15 +20,21 @@
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
+###############################################################################
 ### LOCAL FUNCTIONS ###########################################################
+###############################################################################
 launch_retroarch(){
   echo "[BLEEMSYNC](INFO) launching retroarch"
   if [ -f "$bleemsync_path/opt/retroarch/retroarch" ]; then
-    # Kill bleemsync UI
-    killall -s TERM BleemSync &> /dev/null
+    # Cleanup 
     cd "/home/root"
+    killall -s TERM BleemSync &> "/dev/null"
     killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
-    [ -f "$runtime_log_path/retroarch.log" ] && rm -f "$runtime_log_path/retroarch.log"
+    rm -f "/tmp/launchfilecommand"
+    rm -f "$runtime_log_path/retroarch.log"
+	# Disable Power button
+    echo 2 > /data/power/disable
+    # Set up RetroArch and launch 
     if [ ! -f "$bleemsync_path/opt/retroarch/system/scph102b.bin" ]; then
       mkdir -p "$bleemsync_path/opt/retroarch/system"
       cp -f "/gaadata/system/bios/romw.bin" "$bleemsync_path/opt/retroarch/system/scph102b.bin"
@@ -49,12 +55,20 @@ launch_retroarch(){
     [ ! -f "$custom_theme_path/png/bg.png" ] && cp -f "/usr/sony/share/data/images/GR/JP_US_BG.png" "$custom_theme_path/png/bg.png"
     chmod +x "$bleemsync_path/opt/retroarch/retroarch"
     export HOME="$bleemsync_path/opt/retroarch"
+    # Run RetroArch
     $bleemsync_path/opt/retroarch/retroarch -v &> "$runtime_log_path/retroarch.log"
+    # Post RetroArch run cleanup 
     rm -rf "/tmp/ra_cache"
     export HOME="/home/root" && cd "/home/root"
     sync
-    echo launch_BootMenu > "/tmp/launchfilecommand"
+    if [ "$1" != "--from_ui" ]; then
+      echo launch_BootMenu > "/tmp/launchfilecommand"
+    else
+	  echo "DEBUG1"
+      echo launch_StockUI > "/tmp/launchfilecommand"
+    fi
   else
+    # FAIL catch
     $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
     sleep 1
     echo "[BLEEMSYNC](FAIL) tried to launch retroarch and it's not installed! Opening Stock ui..."
@@ -63,17 +77,26 @@ launch_retroarch(){
   fi
 }
 
+launch_retroarch_standalone(){
+  launch_retroarch --from_ui
+}
+
 launch_BootMenu(){
   echo "[BLEEMSYNC](INFO) launching BootMenu"
-  echo 2 > /data/power/disable
+  # Cleanup 
+  cd "/home/root"
   killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
   rm -f "/tmp/launchfilecommand"
-  [ -d "$bleemsync_path/opt/bleemsync_ui/temp" ] && rm -r "$bleemsync_path/opt/bleemsync_ui/temp"
+  rm -fr "$bleemsync_path/opt/bleemsync_ui/temp"
+  # Disable Power button
+  echo 2 > /data/power/disable
+  # Start BleemSync UI app (will be removed in 1.1)
   if [ ! "$(ps | grep -v grep | grep BleemSync)" ]; then
     rm -f "$runtime_log_path/bleemsync_ui.log"
     cd "$bleemsync_path/opt/bleemsync_ui/"
     chmod +x "$bleemsync_ui_app" && $bleemsync_ui_app >> "$runtime_log_path/bleemsync_ui.log" 2>&1 &
   fi
+  # Run BootMenu
   if [ "$boot_menu_music" = "1" ]; then
     $bleemsync_path/bin/boot_menu --image-folder "$images_path" --music-folder "$sounds_path/" --theme-folder "$themes_path/$selected_theme/boot"
   else
@@ -82,30 +105,44 @@ launch_BootMenu(){
 }
 
 launch_StockUI(){
+  echo "DEBUG2"
   echo "[BLEEMSYNC](INFO) launching stock ui"
-  # Kill bleemsync UI
-  killall -s TERM BleemSync &> /dev/null
-  setup_StockUI
+  # Cleanup
   cd "/home/root"
+  killall -s TERM BleemSync &> /dev/null
+  killall -s KILL showLogo sonyapp ui_menu auto_dimmer pcsx sdl_display &> "/dev/null"
+  rm -f "/tmp/launchfilecommand"
+  # Setup Stock UI with custom
+  echo "DEBUG3"
+  setup_StockUI
+  echo "DEBUG4"
   # Remove power file flags
   rm -f "/data/power/prepare_suspend" "/data/power/apps_okay"
   # Fix for last selected game issue. If not in place user may experience ui issue
   sed -i "s/iUiUserSettingLastSelectGameCursorPos=.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
-
+  # Get ready to run Stock UI
   cd "/data/AppData/sony/pcsx"
   export PCSX_ESC_KEY=2
+  # Indicate we have done the first boot
+  touch "/var/volatile/booted.flag"
+  # Run Stock UI
+  echo "DEBUG5"
+  ls -la "/data/power/"
   /usr/sony/bin/ui_menu --power-off-enable &> "$runtime_log_path/ui_menu.log"
+  echo "DEBUG6"
+  # Post Stock UI run cleanup
   rm -f "/data/power/prepare_suspend"
-  
-  # Reset last selected game in case user does not use BleemSync on next boot
   sed -i "s/iUiUserSettingLastSelectGameCursorPos=.*/iUiUserSettingLastSelectGameCursorPos=0/" /data/AppData/sony/ui/user.pre
   umount /usr/sony/bin/pcsx
   umount /gaadata/databases/regional.db
   umount /usr/sony/share/data/preferences/system.pre
-  rm -r "${VOL_GAADATA}" "${VOL_DATAPCSX}" /var/volatile/bleemsync.cfg
+  rm -r "${VOL_GAADATA}" "${VOL_DATAPCSX}"
 }
 
-initial_setup() {
+###############################################################################
+### SUB LOCAL FUNCTIONS #######################################################
+###############################################################################
+initial_setup() { 
   start=$(date +%s%N)
   if [ ! -f "$bleemsync_path/etc/bleemsync/CFG/bleemsync_cfg.INI" ] || [ -f "$bleemsync_path/flags/UPDATE_CONFIG" ]; then
     echo "[BLEEMSYNC](INFO) Injecting default bleemsync config..."
@@ -130,6 +167,31 @@ initial_setup() {
 setup_StockUI() {
   start=$(date +%s%N)
 
+  #Patch out health check if toggled.
+  if [ -f "/var/volatile/booted.flag" ] || [ "$boot_disable_health" = "1" ]; then
+    PATCH_DIR="/var/volatile/health_patch"
+    PATCH_TARGET=/usr/sony/bin/ui_menu
+    PATCH_WORKING="${PATCH_DIR}/ui_menu"
+    if [ ! -f "$PATCH_WORKING" ]; then
+      start=$(date +%s%N)
+      echo "[BLEEMSYNC](INFO) attempting to patch out H+S statement"
+      # Perform patching
+      mkdir -p "${PATCH_DIR}"
+      cp "${PATCH_TARGET}" "${PATCH_WORKING}"
+      echo -ne '\xb8\x0c\x00' | dd bs=1 of="${PATCH_WORKING}" seek=28084 conv=notrunc
+      echo -ne '\x06\x03' | dd bs=1 of="${PATCH_WORKING}" seek=28120 conv=notrunc
+      echo -ne '\x58\xbe' | dd bs=1 of="${PATCH_WORKING}" seek=28712 conv=notrunc
+      mount -o bind "${PATCH_WORKING}" "${PATCH_TARGET}"
+      if [ "$?" -eq "0" ]; then
+        echo "[BLEEMSYNC](INFO) patched out H+S statement"
+      else
+        echo "[BLEEMSYNC](FAIL) failed to patch out H+S statement, continuing anyway..."
+      fi
+      end=$(date +%s%N)
+      echo "[BLEEMSYNC](PROFILE) BleemSync H+S patching took: $(((end-start)/1000000))ms to execute"
+    fi
+  fi
+  
   # Unmount partitons and create tmpfs - Shut system down on failure
   MOUNT_FAIL=0
   # Create gaadata and data folders in tmp then mount over original folders
@@ -139,7 +201,7 @@ setup_StockUI() {
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/binaries/pcsx" "/usr/sony/bin/pcsx" || MOUNT_FAIL=1
 
   if [ "$MOUNT_FAIL" = "1" ]; then
-    #display error message
+    # FAIL catch
     echo 0 > /sys/class/leds/green/brightness
     echo 1 > /sys/class/leds/red/brightness
     $bleemsync_path/bin/sdl_display "$bleemsync_path/etc/bleemsync/IMG/woah.png" &
@@ -166,21 +228,22 @@ setup_StockUI() {
   ln -s /gaadata/system/bios "${VOL_DATAPCSX}"
   ln -s /usr/sony/bin/plugins "${VOL_DATAPCSX}"
 
-  # Link games on /media
-  media_game_ids=(`"$bleemsync_path/bin/sqlite3" "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES" ".quit"`)
-  for game in "${media_game_ids[@]}"; do
-    ln -s "${mountpoint}/games/${game}/" "${VOL_GAADATA}"
-    ln -s "${mountpoint}/games/${game}/" "${VOL_DATAPCSX}"
-    # Ensure .pcsx/pcsx.cfg is present
-    mkdir -p "${mountpoint}/games/${game}/.pcsx"
-    [ ! -f "${mountpoint}/games/${game}/.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${mountpoint}/games/${game}/.pcsx/pcsx.cfg"
-  done
+  # Link games on /mountpoint
+  if [ -d "$mountpoint/games" ]; then
+    media_game_ids=(`"$bleemsync_path/bin/sqlite3" "$bleemsync_path/etc/bleemsync/SYS/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES" ".quit"`)
+    for game in "${media_game_ids[@]}"; do
+      ln -s "${mountpoint}/games/${game}/" "${VOL_GAADATA}"
+      ln -s "${mountpoint}/games/${game}/" "${VOL_DATAPCSX}"
+      # Ensure .pcsx/pcsx.cfg is present
+      mkdir -p "${mountpoint}/games/${game}/.pcsx"
+      [ ! -f "${mountpoint}/games/${game}/.pcsx/pcsx.cfg" ] && cp "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" "${mountpoint}/games/${game}/.pcsx/pcsx.cfg"
+    done
 
-  if [[ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne ${#media_game_ids[@]} ]]; then
-    echo "[BLEEMSYNC](WARN) You have folders in ${mountpoint}/games/ that are not in the BleemSync database." 
-    echo "[BLEEMSYNC](WARN) Do not manually add or remove games in this folder. Remove any manually created folders and add them via the BleemSync web interface."
+    if [[ `find "${mountpoint}/games/"* -maxdepth 0 -type d | wc -l` -ne ${#media_game_ids[@]} ]]; then
+      echo "[BLEEMSYNC](WARN) You have folders in ${mountpoint}/games/ that are not in the BleemSync database." 
+      echo "[BLEEMSYNC](WARN) Do not manually add or remove games in this folder. Remove any manually created folders and add them via the BleemSync web interface."
+    fi
   fi
-
   # Force intercept to allow launching custom scripts from stock UI
   mount -o bind "$bleemsync_path/etc/bleemsync/CFG/system.pre" "/usr/sony/share/data/preferences/system.pre"
   cp "$bleemsync_path/etc/bleemsync/SUP/scripts/intercept" "/tmp/intercept"
@@ -201,7 +264,6 @@ setup_StockUI() {
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync tmpfs sym linking and processing took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
-
   # Unite EMMC and MEDIA games and databases
   if [ "$link_EMMC_and_USB" = "1" ]; then
     start=$(date +%s%N)
@@ -236,7 +298,8 @@ setup_StockUI() {
     end=$(date +%s%N)
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
   fi
-
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
   #Add Launchers seperate from the games
   total_count=`"$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES ORDER BY GAME_ID DESC LIMIT 1" ".quit"`
   echo "BEGIN TRANSACTION;" > "/tmp/launcher.sql"
@@ -251,16 +314,20 @@ setup_StockUI() {
   echo "COMMIT;" >> "/tmp/launcher.sql"
    
   "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/launcher.sql" ".quit"
-
+  
+  end=$(date +%s%N)
+  echo "[BLEEMSYNC](PROFILE) BleemSync adding launchers: $(((end-start)/1000000))ms to execute"
+#-----------------------------------------------------------------------------#
+  # Clean up temp
   rm -rf "/tmp/"*".sql" "/tmp/"*".csv"
-
-  # Overmount the stock DB now that we're done using it
+  # Overmount the stock DB
   mount -o bind "${VOL_GAADATA}/databases/regional.db" /gaadata/databases/regional.db
 #-----------------------------------------------------------------------------#
 }
-###############################################################################
 
+###############################################################################
 ### MAIN BLEEMSYNC FUNCTION ###################################################
+###############################################################################
 execute_bleemsync_func(){
   echo "[BLEEMSYNC](Executing) execute_bleemsync_func()"
   echo 1 > /sys/class/leds/red/brightness
@@ -280,7 +347,8 @@ execute_bleemsync_func(){
     end=$(date +%s%N)
     echo "[BLEEMSYNC](<1.0) Migration complete: $(((end-start)/1000000))ms to execute"
   fi
-
+#-----------------------------------------------------------------------------#
+  start=$(date +%s%N)
   # Copy over default files if not exist
   mkdir -p "$bleemsync_path/etc/bleemsync/SYS/defaults"
   [ ! -f "$bleemsync_path/etc/bleemsync/SYS/defaults/pcsx.cfg" ] && \
@@ -298,9 +366,6 @@ execute_bleemsync_func(){
   #Initalise config or update if required
   initial_setup
     
-#-----------------------------------------------------------------------------#
-  start=$(date +%s%N)
-
   # Migrate GameData contents and copy default pcsx.cfg if not present
   for game in "${mountpoint}/games/"*/; do
     if [ -d "${game}GameData" ]; then
@@ -379,38 +444,14 @@ execute_bleemsync_func(){
   chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/credits"
   mount -o bind "$bleemsync_path/etc/bleemsync/SUP/scripts/credits" /usr/sony/bin/showCopyright.sh
 #-----------------------------------------------------------------------------#
-  #Patch out health check if toggled.
-  if [ "$boot_disable_health" = "1" ]; then
-    start=$(date +%s%N)
-    echo "[BLEEMSYNC](INFO) attempting to patch out H+S statement"
-    PATCH_DIR="/var/volatile/health_patch"
-    PATCH_TARGET=/usr/sony/bin/ui_menu
-    PATCH_WORKING="${PATCH_DIR}/ui_menu"
-
-    # Perform patching
-    mkdir -p "${PATCH_DIR}"
-    cp "${PATCH_TARGET}" "${PATCH_WORKING}"
-    echo -ne '\xb8\x0c\x00' | dd bs=1 of="${PATCH_WORKING}" seek=28084 conv=notrunc
-    echo -ne '\x06\x03' | dd bs=1 of="${PATCH_WORKING}" seek=28120 conv=notrunc
-    echo -ne '\x58\xbe' | dd bs=1 of="${PATCH_WORKING}" seek=28712 conv=notrunc
-    mount -o bind "${PATCH_WORKING}" "${PATCH_TARGET}"
-    if [ "$?" -eq "0" ]; then
-      echo "[BLEEMSYNC](INFO) patched out H+S statement"
-    else
-      echo "[BLEEMSYNC](FAIL) failed to patch out H+S statement, continuing anyway..."
-    fi
-    end=$(date +%s%N)
-    echo "[BLEEMSYNC](PROFILE) BleemSync H+S patching took: $(((end-start)/1000000))ms to execute"
-  fi
-#-----------------------------------------------------------------------------#
-  #Select UI theme whilst load screen available (Profiler built in)
+  # Select UI theme whilst load screen available (Profiler built in)
   select_UI_theme
 #-----------------------------------------------------------------------------#
   echo 0 > /sys/class/leds/red/brightness
   echo "[BLEEMSYNC](INFO) completed bleemsync boot"
 #-----------------------------------------------------------------------------#
   start=$(date +%s%N)
-  #Cleanup before starting main user applications
+  # Cleanup before starting main user applications
   rm -rf "/tmp/systemd"*
   rm -rf "/tmp/diag/"*
 
@@ -419,7 +460,6 @@ execute_bleemsync_func(){
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
- 
   while [ $boot_command != "quit" ]; do
     $boot_command
     [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
@@ -437,4 +477,6 @@ execute_bleemsync_func(){
   reboot
   exit 0
 }
+###############################################################################
+###############################################################################
 ###############################################################################
