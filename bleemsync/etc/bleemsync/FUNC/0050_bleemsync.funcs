@@ -458,16 +458,15 @@ execute_bleemsync_func(){
   echo "[BLEEMSYNC](PROFILE) BleemSync pre run cleanup took: $(((end-start)/1000000))ms to execute"
 #-----------------------------------------------------------------------------#
   while [ $boot_command != "quit" ]; do
-    $boot_command
     if [ $boot_command = "launch_StockUI" ]; then
-      # Restart Weston when returning from Stock UI
-      # It may be worth doing this when returning from any command
+      # Restart Weston before launching Stock UI to prevent process hang
       start_weston=$(date +%s%N)
       systemctl restart weston
       wait_sdl
       end_weston=$(date +%s%N)
       echo "[BLEEMSYNC](PROFILE) Weston restart took: $(((end_weston-start_weston)/1000000))ms to execute"
     fi
+    $boot_command
     [ -f /tmp/launchfilecommand ] && boot_command=$(cat /tmp/launchfilecommand) || boot_command="quit"
     rm -f /tmp/launchfilecommand
   done
