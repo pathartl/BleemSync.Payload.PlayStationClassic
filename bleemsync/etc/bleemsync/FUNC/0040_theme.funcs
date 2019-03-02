@@ -24,20 +24,28 @@ overmount_existing() {
   "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing" "$@"
 }
 
-select_UI_theme(){
+select_UI_theme() {
   echo "[BLEEMSYNC](Executing) select_UI_theme()"
-  echo 1 > /sys/class/leds/red/brightness
+  echo 1 >/sys/class/leds/red/brightness
   start=$(date +%s%N)
   chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing"
   # Check for upper-case folder names and lower-case them
-  for theme_folder in $( ls $themes_path/ | grep [A-Z] ); do
+  for theme_folder in $(ls $themes_path/ | grep [A-Z]); do
     mv -f "$themes_path/$theme_folder" "$themes_path/_$theme_folder"
     mv -f "$themes_path/_$theme_folder" "$(echo $themes_path/$theme_folder | tr 'A-Z' 'a-z')"
   done
 
   # Set random theme if setting is set
   if [ "$random_theme_onload" = "1" ]; then
-    selected_theme=$(ls -d1 "$themes_path/"*/ | sort --random-sort | head -1 | xargs basename)
+    # prevents load th same theme twice in a row
+    last_theme="$themes_path/lastTheme"
+    [ -f "$last_theme" ] && prev_theme=$(cat "$last_theme")
+    selected_theme="$prev_theme"
+    n="0"
+    while [ "$selected_theme" == "$prev_theme" ] && [ "$n" -lt 3 ]; do
+      n=$((n + 1))
+      selected_theme=$(ls -d1 "$themes_path/"*/ | sort --random-sort | head -1 | xargs basename)
+    done
   fi
 
   # Lower-case the theme variable incase it causes and issue
@@ -58,6 +66,7 @@ select_UI_theme(){
     fi
 
     overmount_existing "$themes_path/$selected_theme" /usr/sony/share/data
+    echo "$selected_theme" >"$last_theme"
   fi
   # log if stuff is found or not
   if [ "$found_theme" == "1" ]; then
@@ -70,8 +79,8 @@ select_UI_theme(){
   else
     echo "[BLEEMSYNC](INFO)(theme) mounting stock music files"
   fi
-  echo 0 > /sys/class/leds/red/brightness
+  echo 0 >/sys/class/leds/red/brightness
   end=$(date +%s%N)
-  echo "[BLEEMSYNC](PROFILE) select_UI_theme() took: $(((end-start)/1000000))ms to execute"
+  echo "[BLEEMSYNC](PROFILE) select_UI_theme() took: $(((end - start) / 1000000))ms to execute"
   echo "[BLEEMSYNC](INFO) completed select_UI_theme()"
 }
