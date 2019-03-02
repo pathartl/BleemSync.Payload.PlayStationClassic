@@ -296,24 +296,30 @@ setup_StockUI() {
     echo "[BLEEMSYNC](PROFILE) BleemSync EMMC + USB dyna link took: $(((end-start)/1000000))ms to execute"
   fi
 #-----------------------------------------------------------------------------#
-  start=$(date +%s%N)
-  #Add Launchers seperate from the games
-  total_count=`"$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES ORDER BY GAME_ID DESC LIMIT 1" ".quit"`
-  echo "BEGIN TRANSACTION;" > "/tmp/launcher.sql"
-  echo "INSERT INTO DISC VALUES(NULL,$((total_count + 1)),1,'RetroArch');" >> "/tmp/launcher.sql"
-  echo "INSERT INTO MENU_ENTRIES VALUES($((total_count + 1)),'​RetroArch','LibRetro',2019,1,'CERO_A','QR_CODE_GM',NULL,9999);" >> "/tmp/launcher.sql"
-  ln -s "$bleemsync_path/etc/bleemsync/SUP/launchers/retroarch_launch" "${VOL_GAADATA}/$((total_count + 1))"
-  ln -s "$bleemsync_path/etc/bleemsync/SUP/launchers/retroarch_launch" "${VOL_DATAPCSX}/$((total_count + 1))"
-  echo "INSERT INTO DISC VALUES(NULL,$((total_count + 2)),1,'RetroArch');" >> "/tmp/launcher.sql"
-  echo "INSERT INTO MENU_ENTRIES VALUES($((total_count + 2)),'​Boot Menu','ModMyClassic',2019,1,'CERO_A','QR_CODE_GM',NULL,9999);" >> "/tmp/launcher.sql"
-  ln -s "$bleemsync_path/etc/bleemsync/SUP/launchers/bootmenu_launch" "${VOL_GAADATA}/$((total_count + 2))"
-  ln -s "$bleemsync_path/etc/bleemsync/SUP/launchers/bootmenu_launch" "${VOL_DATAPCSX}/$((total_count + 2))"
-  echo "COMMIT;" >> "/tmp/launcher.sql"
-   
-  "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/launcher.sql" ".quit"
-  
-  end=$(date +%s%N)
-  echo "[BLEEMSYNC](PROFILE) BleemSync adding launchers: $(((end-start)/1000000))ms to execute"
+  if [ "$ui_ra_launcher" = "1" ] || [ "$ui_bootmenu_launcher" = "1" ]; then
+    start=$(date +%s%N)
+    #Add Launchers seperate from the games
+    total_count=`"$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd "SELECT GAME_ID FROM MENU_ENTRIES ORDER BY GAME_ID DESC LIMIT 1" ".quit"`
+    echo "BEGIN TRANSACTION;" > "/tmp/launcher.sql"
+    if [ "$ui_ra_launcher" = "1" ]; then
+      echo "INSERT INTO DISC VALUES(NULL,$((total_count + 1)),1,'RetroArch');" >> "/tmp/launcher.sql"
+      echo "INSERT INTO MENU_ENTRIES VALUES($((total_count + 1)),'​RetroArch','LibRetro',2019,1,'CERO_A','QR_CODE_GM',NULL,9999);" >> "/tmp/launcher.sql"
+      ln -s "$bleemsync_path/etc/bleemsync/SUP/launchers/retroarch_launch" "${VOL_GAADATA}/$((total_count + 1))"
+      ln -s "$bleemsync_path/etc/bleemsync/SUP/launchers/retroarch_launch" "${VOL_DATAPCSX}/$((total_count + 1))"
+    fi
+    if [ "$ui_bootmenu_launcher" = "1" ]; then
+      echo "INSERT INTO DISC VALUES(NULL,$((total_count + 2)),1,'RetroArch');" >> "/tmp/launcher.sql"
+      echo "INSERT INTO MENU_ENTRIES VALUES($((total_count + 2)),'​Boot Menu','ModMyClassic',2019,1,'CERO_A','QR_CODE_GM',NULL,9999);" >> "/tmp/launcher.sql"
+      ln -s "$bleemsync_path/etc/bleemsync/SUP/launchers/bootmenu_launch" "${VOL_GAADATA}/$((total_count + 2))"
+      ln -s "$bleemsync_path/etc/bleemsync/SUP/launchers/bootmenu_launch" "${VOL_DATAPCSX}/$((total_count + 2))"
+    fi
+    echo "COMMIT;" >> "/tmp/launcher.sql"
+    
+    "$bleemsync_path/bin/sqlite3" "${VOL_GAADATA}/databases/regional.db" -cmd ".read /tmp/launcher.sql" ".quit"
+    
+    end=$(date +%s%N)
+    echo "[BLEEMSYNC](PROFILE) BleemSync adding launchers: $(((end-start)/1000000))ms to execute"
+  fi
 #-----------------------------------------------------------------------------#
   # Clean up temp
   rm -rf "/tmp/"*".sql" "/tmp/"*".csv"

@@ -20,13 +20,13 @@
 # ModMyClassic.com / https://discordapp.com/invite/8gygsrw
 ###############################################################################
 
-overmount_existing() {
+overmount_existing(){
   "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing" "$@"
 }
 
-select_UI_theme() {
+select_UI_theme(){
   echo "[BLEEMSYNC](Executing) select_UI_theme()"
-  echo 1 >/sys/class/leds/red/brightness
+  echo 1 > /sys/class/leds/red/brightness
   start=$(date +%s%N)
   chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing"
   # Check for upper-case folder names and lower-case them
