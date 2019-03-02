@@ -53,10 +53,10 @@ launch_retroarch(){
     [ ! -f "$ozone_theme_path/regular.ttf" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Regular.ttf" "$ozone_theme_path/regular.ttf"
     [ ! -f "$ozone_theme_path/bold.ttf" ] && cp -f "/usr/sony/share/data/font/SSTJapanese-Bold.ttf" "$ozone_theme_path/bold.ttf"
     [ ! -f "$custom_theme_path/png/bg.png" ] && cp -f "/usr/sony/share/data/images/GR/JP_US_BG.png" "$custom_theme_path/png/bg.png"
-    chmod +x "$bleemsync_path/opt/retroarch/retroarch"
-    export HOME="$bleemsync_path/opt/retroarch"
+    chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/ra_launch.sh"
+    export HOME="$retroarch_path"
     # Run RetroArch
-    $bleemsync_path/opt/retroarch/retroarch -v &> "$runtime_log_path/retroarch.log"
+    "$bleemsync_path/etc/bleemsync/SUP/scripts/ra_launch.sh" -v
     # Post RetroArch run cleanup 
     rm -rf "/tmp/ra_cache"
     export HOME="/home/root" && cd "/home/root"

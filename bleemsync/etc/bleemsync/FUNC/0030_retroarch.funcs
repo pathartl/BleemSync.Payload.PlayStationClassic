@@ -50,7 +50,7 @@ launch_retroarch_from_StockUI(){
     echo "[BLEEMSYNC](INFO) copied romw.bin to scph102b.bin for RA PCSX"
   fi
   mkdir -p "/tmp/ra_cache"
-  chmod +x "$retroarch_path/retroarch"
+  chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/ra_launch.sh"
   if [ -d "$ra_savestate_path" ]; then
       rm -fr "$ra_savestate_path"
   fi
@@ -74,7 +74,7 @@ launch_retroarch_from_StockUI(){
   echo "[BLEEMSYNC](INFO) Launching RetroArch for game $intercept_game_path"
   end=$(date +%s%N)
   echo "[BLEEMSYNC](PROFILE) RetroArch launch_retroarch_from_StockUI function took: $(((end-start)/1000000))ms to execute (up to launching RetroArch executable)"
-  $retroarch_path/retroarch -v -L "$retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so" "$intercept_game_path" &> "$runtime_log_path/retroarch.log"
+  "$bleemsync_path/etc/bleemsync/SUP/scripts/ra_launch.sh" -v -L "$retroarch_path/.config/retroarch/cores/pcsx_rearmed_libretro.so" "$intercept_game_path"
   echo "[BLEEMSYNC](INFO) RetroArch exit code $?"
   save_ra_savestates
   rm -fr "/tmp/ra_cache"
