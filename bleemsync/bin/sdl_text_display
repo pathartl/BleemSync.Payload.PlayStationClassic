@@ -1,0 +1,43 @@
+#!/bin/sh
+
+source /var/volatile/bleemsync.cfg
+
+if [ -z "$1" ]; then
+    echo "usage: $0 <TEXT> <TEXTX> <TEXTY> <FONTSIZE> <TEXTCOLOR> <TEXTBGCOLOR (0xAARRGGBB)> <BGIMAGEPATH> &" 1>&2
+    exit 1
+fi
+
+#Process Input
+text=$1
+textX=$2
+textY=$3
+fontsize=$4
+color=$5
+bgcolor=$6
+bgimage=$7
+tmpcommand="/tmp/sdldisplaycmd"
+
+#Sanitise Input
+if [ ! -z "$text" ]; then
+  [ -z "$textX" ] && textX=640
+  [ -z "$textY" ] && textY=120
+  [ -z "$fontsize" ] && fontsize=12
+  [ -z "$color" ] && color=0xFFFFFFFF
+fi
+[ -z "$bgimage" ] && bgimage="$bleemsync_path/etc/bleemsync/IMG/splashscreen.png"
+
+#Create SDL DISPLAY INPUT
+echo "IMAGE	640	360	$bgimage" > $tmpcommand
+if [ -z "$bgcolor"]; then
+  echo "TEXT	$textX	$textY	$fontsize	$color  $text" >> $tmpcommand
+else
+  echo "TEXTWBG	$textX	$textY	$fontsize	$color	$bgcolor	$text" >> $tmpcommand
+fi
+
+#Execute to FrameBuffer and clean up
+sdl_display -file $tmpcommand &
+pid=$!
+sleep 1
+for x in $(pidof "sdl_display"); do
+  [ ! "$pid" = "$x" ] && kill $x
+done
