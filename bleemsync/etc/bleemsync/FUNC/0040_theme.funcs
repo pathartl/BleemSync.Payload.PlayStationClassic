@@ -30,7 +30,7 @@ select_UI_theme() {
   start=$(date +%s%N)
   chmod +x "$bleemsync_path/etc/bleemsync/SUP/scripts/overmount_existing"
   # Check for upper-case folder names and lower-case them
-  for theme_folder in $(ls $themes_path/ | grep [A-Z]); do
+  for theme_folder in $(ls -d1 "$themes_path/"*/ | grep [A-Z]); do
     mv -f "$themes_path/$theme_folder" "$themes_path/_$theme_folder"
     mv -f "$themes_path/_$theme_folder" "$(echo $themes_path/$theme_folder | tr 'A-Z' 'a-z')"
   done
